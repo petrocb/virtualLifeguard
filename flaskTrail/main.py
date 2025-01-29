@@ -1,11 +1,13 @@
 from flask import Flask, render_template, Response, request, jsonify
 import cv2
-from torchvision.transforms.v2.functional import adjust_brightness
+from matplotlib.style.core import available
+# from torchvision.transforms.v2.functional import adjust_brightness
 from ultralytics import YOLO
-import numpy as np
+# import numpy as np
 app = Flask(__name__)
 
 model = YOLO('yolo11n.pt')
+model2 = YOLO('yolo11n.pt')
 
 threshold = 0.01
 brightness = 0
@@ -30,13 +32,15 @@ def update_brightness():
     data = request.get_json()
     brightness = float(data['brightness'])
     brightness *= 5.1
-    brightness = brightness - 255;
+    brightness = brightness - 255
     return jsonify({"status": "success", "brigtness": brightness})
 
 def setBrightness(image):
     global brightness
     h, s, v = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
     v = brightness = brightness * 5.1 - 255
+
+
 @app.route('/update_cam', methods=['POST'])
 def update_cam():
     global cam
@@ -50,24 +54,36 @@ def generate_frames():
     global threshold
     global brightness
     global cam
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", cam)
-    cap = cv2.VideoCapture(cam)
+    availableCams = []
+    for i in range(10):
+        cap = cv2.VideoCapture()
+        if cap.isOpened():
+            availableCams.append(i)
+            cap.release()
+    print("Available cameras: ", availableCams)
+    # cap = cv2.VideoCapture(cam)
+    cap = cv2.VideoCapture(0)
+    cap2 = cv2.VideoCapture(1)
     while True:
         success, frame = cap.read()
+        _, frame2 = cap2.read()
         if not success:
             break
         else:
-            cap = cv2.VideoCapture(cam)
-            # frame = setBrightness()
-            frame = cv2.convertScaleAbs(frame, alpha=1, beta=brightness)
-            results = model.predict(source=frame, conf=threshold)
-            for r in results:
-                frame = r.plot()
+            # for i in availableCams:
+                cap = cv2.VideoCapture(0)
+                cap2 = cv2.VideoCapture(1)
+                # frame = setBrightness()
+                frame = cv2.convertScaleAbs(frame, alpha=1, beta=brightness)
+                results = model.track(source=frame, conf=threshold)
+                results2 = model2.track(source=frame2, conf=threshold)
+                for r in results:
+                    frame = r.plot()
 
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/video_feed')
 def video_feed():
