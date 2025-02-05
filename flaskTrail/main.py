@@ -3,6 +3,7 @@ import cv2
 from matplotlib.style.core import available
 # from torchvision.transforms.v2.functional import adjust_brightness
 from ultralytics import YOLO
+import pdb
 # import numpy as np
 app = Flask(__name__)
 
@@ -55,35 +56,34 @@ def generate_frames():
     global brightness
     global cam
     availableCams = []
+    models = []
+    caps = []
     for i in range(10):
         cap = cv2.VideoCapture()
         if cap.isOpened():
             availableCams.append(i)
+            models.append(YOLO("yolo11n.pt"))
             cap.release()
+            caps.append(cv2.VideoCapture(i))
     print("Available cameras: ", availableCams)
     # cap = cv2.VideoCapture(cam)
-    cap = cv2.VideoCapture(0)
-    cap2 = cv2.VideoCapture(1)
-    while True:
-        success, frame = cap.read()
-        _, frame2 = cap2.read()
-        if not success:
-            break
-        else:
-            # for i in availableCams:
-                cap = cv2.VideoCapture(0)
-                cap2 = cv2.VideoCapture(1)
-                # frame = setBrightness()
-                frame = cv2.convertScaleAbs(frame, alpha=1, beta=brightness)
-                results = model.track(source=frame, conf=threshold)
-                results2 = model2.track(source=frame2, conf=threshold)
-                for r in results:
-                    frame = r.plot()
 
-                ret, buffer = cv2.imencode('.jpg', frame)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    while True:
+        # pdb.set_trace()
+        for i in range(len(models)):
+
+            _, frame = caps[i].read()
+        # frame = setBrightness()
+            frame = cv2.convertScaleAbs(frame, alpha=1, beta=brightness)
+            # results = model.track(source=frame, conf=threshold)
+        # results2 = model2.track(source=frame2, conf=threshold)
+        #     for r in results:
+        #         frame = r.plot()
+
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/video_feed')
 def video_feed():
