@@ -1,7 +1,7 @@
 from flask import Flask, render_template, Response, request, jsonify
 import cv2
 from torchvision.transforms.v2.functional import adjust_brightness
-from ultralytics.ultralytics import YOLO
+from ultralytics import YOLO
 import numpy as np
 app = Flask(__name__)
 

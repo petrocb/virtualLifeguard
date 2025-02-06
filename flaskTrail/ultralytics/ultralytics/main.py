@@ -1,7 +1,7 @@
 from flask import Flask, render_template, Response, request, jsonify
 import cv2
 from torchvision.transforms.v2.functional import adjust_brightness
-from ultralytics.ultralytics import YOLO
+from ultralytics import YOLO
 import numpy as np
 app = Flask(__name__)
 
@@ -60,7 +60,7 @@ def generate_frames():
             cap = cv2.VideoCapture(cam)
             # frame = setBrightness()
             frame = cv2.convertScaleAbs(frame, alpha=1, beta=brightness)
-            results = model.predict(source=frame, conf=threshold)
+            results = model.track(source=frame, conf=threshold)
             for r in results:
                 print(r)
                 frame = r.plot()
