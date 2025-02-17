@@ -454,7 +454,7 @@ class Results(SimpleClass):
         im_gpu=None,
         kpt_radius=5,
         kpt_line=True,
-        labels=False,
+        labels=True,
         boxes=True,
         masks=True,
         probs=True,
@@ -540,7 +540,7 @@ class Results(SimpleClass):
                 name = ("" if id is None else f"id:{id} ") + names[c]
                 label = (f"{name} {d_conf:.2f}" if conf else name) if labels else None
                 box = d.xyxyxyxy.reshape(-1, 4, 2).squeeze() if is_obb else d.xyxy.squeeze()
-                if name == "person" or name == "bird":
+                if "person" in name or "bird" in name:
                     annotator.box_label(
                         box,
                         label,

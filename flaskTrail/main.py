@@ -61,22 +61,22 @@ def generate_frames():
             availableCams.append(i)
             cap.release()
     print("Available cameras: ", availableCams)
-    # cap = cv2.VideoCapture(cam)
-    cap = cv2.VideoCapture(0)
-    cap2 = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(cam)
+    # cap = cv2.VideoCapture(0)
+    # cap2 = cv2.VideoCapture(1)
     while True:
         success, frame = cap.read()
-        _, frame2 = cap2.read()
+        # _, frame2 = cap2.read()
         if not success:
             break
         else:
             # for i in availableCams:
-                cap = cv2.VideoCapture(0)
-                cap2 = cv2.VideoCapture(1)
+                cap = cv2.VideoCapture(cam)
+                # cap2 = cv2.VideoCapture(1)
                 # frame = setBrightness()
                 frame = cv2.convertScaleAbs(frame, alpha=1, beta=brightness)
+                # results = model.predict(source=frame, conf=threshold)
                 results = model.track(source=frame, conf=threshold)
-                results2 = model2.track(source=frame2, conf=threshold)
                 for r in results:
                     frame = r.plot()
 

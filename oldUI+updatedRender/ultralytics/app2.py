@@ -3,6 +3,7 @@ from tkinter import Label, Frame
 from ultralytics import YOLO
 import cv2
 from PIL import Image, ImageTk
+from tracker import tracker
 
 
 class SwimmerDetectionApp:
@@ -32,22 +33,40 @@ class SwimmerDetectionApp:
         self.model = self.load_model()
         self.cap = cv2.VideoCapture(1)
         self.running = True
-
+        self.tracker = tracker()
         self.update_frame()
 
     def load_model(self):
-        return YOLO('yolo11n.pt')
+        return YOLO('yolo11x.pt')
 
     def update_frame(self):
         ret, frame = self.cap.read()
         if ret and self.running:
-            results = self.model.predict(source=frame, conf=0.01)
-            tracking(results)
+            # results = self.model.predict(source=frame, conf=0.01)
+            results = self.model.track(source=frame, conf=0.01)
+
+
+            results2 = []
             for r in results:
-                # print("!!!!!!!!!!!!!!!!!!!!!", type(r), r.boxes.xywh, r.boxes.cls)
-
-                frame = r.plot()
-
+                # print(r.boxes.xywh, r.boxes.cls, r.boxes.id, r.boxes.conf)
+                for i in range(len(r.boxes.xywh)):  # Iterate over all detected boxes
+                    results2.append({
+                        "xywh": r.boxes.xywh[i].tolist(),  # Convert tensor to list
+                        # "cls": int(r.boxes.cls[i].item()),  # Convert single-value tensor to int
+                        "id": int(r.boxes.id[i].item())  # Convert single-value tensor to int
+                        # "conf": float(r.boxes.conf[i].item())  # Convert single-value tensor to float
+                    })
+                # print(r.boxes.xywh[0], r.boxes.cls[0], r.boxes.id[0], r.boxes.conf[0])
+                # for res in results2[:5]:  # Print only the first 5 to check
+                #     print(res)
+                frame = r.plot(labels=True)
+            self.tracker.track(results2)
+            # try:
+            #     locations = tracking(results2, locations)
+            # except NameError:
+            #     locations = tracking(results2, None)
+            #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            # tracking(results2, )
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             img = Image.fromarray(img)
             imgtk = ImageTk.PhotoImage(image=img)
@@ -61,8 +80,14 @@ class SwimmerDetectionApp:
         self.cap.release()
         self.root.destroy()
 
-def tracking(result):
-    print("tracking")
+    # def tracking(self, results):
+    #     if self.locations == []:
+    #         self.locations = results
+    #     else:
+    #         print(self.locations)
+
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()
