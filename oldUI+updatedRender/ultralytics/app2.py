@@ -31,7 +31,7 @@ class SwimmerDetectionApp:
 
         # Load model and start video capture
         self.model = self.load_model()
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
         self.running = True
         self.tracker = tracker()
         self.update_frame()
@@ -43,19 +43,19 @@ class SwimmerDetectionApp:
         ret, frame = self.cap.read()
         if ret and self.running:
             # results = self.model.predict(source=frame, conf=0.01)
-            results = self.model.track(source=frame, conf=0.01)
+            results = self.model.track(source=frame, conf=0.01, persist=True)
 
 
             results2 = []
             for r in results:
                 # print(r.boxes.xywh, r.boxes.cls, r.boxes.id, r.boxes.conf)
-                for i in range(len(r.boxes.xywh)):  # Iterate over all detected boxes
-                    results2.append({
-                        "xywh": r.boxes.xywh[i].tolist(),  # Convert tensor to list
+                # for i in range(len(r.boxes.xywh)):  # Iterate over all detected boxes
+                    # results2.append({
+                    #     "xywh": r.boxes.xywh[i].tolist(),  # Convert tensor to list
                         # "cls": int(r.boxes.cls[i].item()),  # Convert single-value tensor to int
-                        "id": int(r.boxes.id[i].item())  # Convert single-value tensor to int
+                        # "id": int(r.boxes.id[i].item())  # Convert single-value tensor to int
                         # "conf": float(r.boxes.conf[i].item())  # Convert single-value tensor to float
-                    })
+                    # })
                 # print(r.boxes.xywh[0], r.boxes.cls[0], r.boxes.id[0], r.boxes.conf[0])
                 # for res in results2[:5]:  # Print only the first 5 to check
                 #     print(res)
