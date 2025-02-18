@@ -31,13 +31,13 @@ class SwimmerDetectionApp:
 
         # Load model and start video capture
         self.model = self.load_model()
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.running = True
         self.tracker = tracker()
         self.update_frame()
 
     def load_model(self):
-        return YOLO('yolo11x.pt')
+        return YOLO('yolo11n.pt')
 
     def update_frame(self):
         ret, frame = self.cap.read()

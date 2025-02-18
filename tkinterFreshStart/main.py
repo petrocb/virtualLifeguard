@@ -3,6 +3,8 @@ from ultralytics.models.yolo.model import YOLO
 import tkinter as tk
 from tkinter import Label, Frame
 from PIL import Image, ImageTk
+# from realesrgan import RealESRGAN
+import torch
 
 class SwimmerDetectionApp:
     def __init__(self, root):
@@ -29,7 +31,8 @@ class SwimmerDetectionApp:
 
         # Load model and start video capture
         self.model = self.load_model()
-        self.cap = cv2.VideoCapture(0)
+        # self.upScaleModel = RealESRGAN(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+        self.cap = cv2.VideoCapture(1)
         self.running = True
         # self.tracker = tracker()
         self.update_frame()
@@ -40,10 +43,12 @@ class SwimmerDetectionApp:
 
     def update_frame(self):
         _, frame = self.cap.read()
-        results = self.model.track(source=frame, conf=0.01, persist=True)
-        # results[0].plot(labels=True)
-        for r in results:
-            r.plot(labels=True)
+        # frame = self.upScaleModel.predict(frame)
+        # results = self.model.track(source=frame, conf=0.01, persist=True, stream=True)
+        results = self.model.predict(frame, conf=0.01)
+        frame = results[0].plot(labels=False)
+        # for r in results:
+        #     r.plot(labels=True)
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=img)
