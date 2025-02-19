@@ -3,6 +3,9 @@ from ultralytics.models.yolo.model import YOLO
 import tkinter as tk
 from tkinter import Label, Frame
 from PIL import Image, ImageTk
+import pygame
+from tracker import tracker
+
 # from realesrgan import RealESRGAN
 import torch
 
@@ -30,45 +33,48 @@ class SwimmerDetectionApp:
         tk.Scale(self.streamOptionsFrame, from_=0, to=100, orient="horizontal").grid(row=0, column=1)
 
         # Load model and start video capture
-        self.model = self.load_model()
+        self.model = self.loadModel()
         # self.upScaleModel = RealESRGAN(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
         self.cap = cv2.VideoCapture(1)
         self.running = True
-        # self.tracker = tracker()
-        self.update_frame()
+        self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
+        self.soundPlaying = False
+        self.tracker = tracker()
+        self.updateFrame()
 
-
-    def load_model(self):
+    def loadModel(self):
         return YOLO('yolo11n.pt')
 
-    def update_frame(self):
+    def updateFrame(self):
         _, frame = self.cap.read()
+
+        self.playSound()
         # frame = self.upScaleModel.predict(frame)
-        # results = self.model.track(source=frame, conf=0.01, persist=True, stream=True)
-        results = self.model.predict(frame, conf=0.01)
+        results = self.model.track(source=frame, conf=0.01, persist=True)
+        # results = self.model.predict(frame, conf=0.1)
         frame = results[0].plot(labels=False)
-        # for r in results:
-        #     r.plot(labels=True)
+
+        self.tracker.track(results)
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=img)
         self.label.imgtk = imgtk
         self.label.configure(image=imgtk)
         # print("Updating frame")
-        self.root.after(10, self.update_frame)
+        self.root.after(10, self.updateFrame)
 
-    def on_closing(self):
+    def onClosing(self):
         self.cap.release()
         self.root.destroy()
 
+    def playSound(self):
+        if not self.soundPlaying:
+            self.sound.play(-1)
+            self.soundPlaying = True
 
-
-
-#
-# cap.release()
-# cv2.destroyAllWindows()
 if __name__ == "__main__":
     root = tk.Tk()
+    pygame.mixer.init()
     app = SwimmerDetectionApp(root)
-    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    root.protocol("WM_DELETE_WINDOW", app.onClosing)
     root.mainloop()

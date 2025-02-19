@@ -342,7 +342,7 @@ class AutoBackend(nn.Module):
             import tensorflow as tf
 
             keras = False  # assume TF1 saved_model
-            model = tf.keras.models.load_model(w) if keras else tf.saved_model.load(w)
+            model = tf.keras.models.loadModel() if keras else tf.saved_model.load(w)
             metadata = Path(w) / "metadata.yaml"
 
         # TF GraphDef
@@ -450,7 +450,7 @@ class AutoBackend(nn.Module):
             if not w.is_file():  # if not *.param
                 w = next(w.glob("*.param"))  # get *.param file from *_ncnn_model dir
             net.load_param(str(w))
-            net.load_model(str(w.with_suffix(".bin")))
+            net.loadModel()
             metadata = w.parent / "metadata.yaml"
 
         # NVIDIA Triton Inference Server
