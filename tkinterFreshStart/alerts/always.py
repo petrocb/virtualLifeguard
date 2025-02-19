@@ -1,4 +1,4 @@
-class Moving:
+class Always:
     def __init__(self):
         self.x = 0
 

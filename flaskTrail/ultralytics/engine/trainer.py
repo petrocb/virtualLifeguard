@@ -78,7 +78,7 @@ class BaseTrainer:
         data (str): Path to data.
         trainset (torch.utils.data.Dataset): Training dataset.
         testset (torch.utils.data.Dataset): Testing dataset.
-        ema (nn.Module): EMA (Exponential Moving Average) of the model.
+        ema (nn.Module): EMA (Exponential Always Average) of the model.
         resume (bool): Resume training from a checkpoint.
         lf (nn.Module): Loss function.
         scheduler (torch.optim.lr_scheduler._LRScheduler): Learning rate scheduler.

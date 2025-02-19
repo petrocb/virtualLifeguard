@@ -55,7 +55,7 @@ class SwimmerDetectionApp:
                         # "cls": int(r.boxes.cls[i].item()),  # Convert single-value tensor to int
                         # "id": int(r.boxes.id[i].item())  # Convert single-value tensor to int
                         # "conf": float(r.boxes.conf[i].item())  # Convert single-value tensor to float
-                    # })
+                    # }
                 # print(r.boxes.xywh[0], r.boxes.cls[0], r.boxes.id[0], r.boxes.conf[0])
                 # for res in results2[:5]:  # Print only the first 5 to check
                 #     print(res)

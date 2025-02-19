@@ -5,7 +5,7 @@ from tkinter import Label, Frame
 from PIL import Image, ImageTk
 import pygame
 from tracker import tracker
-
+from alerts.always import Always
 # from realesrgan import RealESRGAN
 import torch
 
@@ -40,27 +40,31 @@ class SwimmerDetectionApp:
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
         self.tracker = tracker()
+        self.alerts = [Always()]
         self.updateFrame()
+
 
     def loadModel(self):
         return YOLO('yolo11n.pt')
 
     def updateFrame(self):
         _, frame = self.cap.read()
-
-        self.playSound()
+        for i in self.alerts:
+            if i.step():
+                self.playSound()
         # frame = self.upScaleModel.predict(frame)
         results = self.model.track(source=frame, conf=0.01, persist=True)
         # results = self.model.predict(frame, conf=0.1)
-        frame = results[0].plot(labels=False)
+        frame = results[0].plot(labels=True)
 
-        self.tracker.track(results)
+
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=img)
         self.label.imgtk = imgtk
         self.label.configure(image=imgtk)
         # print("Updating frame")
+        self.tracker.track(results)
         self.root.after(10, self.updateFrame)
 
     def onClosing(self):

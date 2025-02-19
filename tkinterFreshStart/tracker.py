@@ -50,20 +50,49 @@
         #         pass
         #     self.locations.append(results)
 
-
+from datetime import datetime
 
 class tracker:
     def __init__(self):
         self.locations = None
 
-    def track(self, results):
-        # for r in results:
-        #     for i in range(len(r.boxes.xywh)):  # Iterate over all detected boxes
-        #         results2.append({
+    def track(self, yoloResults):
+        results = []
+        for i in range(len(yoloResults[0].boxes.xywh.tolist())):
+            results.append({
+                        "xywh": yoloResults[0].boxes.xywh[i].tolist(),
+                        "cls": int(yoloResults[0].boxes.cls[i].item()),
+                        "id": int(yoloResults[0].boxes.id[i].item()),
+                        "conf": float(yoloResults[0].boxes.conf[i].item())
+                    })
+        # if self.locations is None:
+        #     self.locations = []
+        #     for i in results:
+        #         self.locations.append({'id': i['id'], 'yoloIDs': [i['id']], 'steps': [
+        #             {'time': datetime.utcnow(), 'x': i['xywh'][0], 'y': i['xywh'][1], 'w': i['xywh'][2],
+        #              'h': i['xywh'][3]}]})
+        # else:
+        #     for o in results:
+        #         # for m in range(len(r.boxes.xywh)):
+        #         for m in self.locations:
+        #             if m['id'] == o['id']:
+        #                 m['steps'].append(
+        #                     {'time': datetime.utcnow(), 'x': o['xywh'][0], 'y': o['xywh'][1], 'w': o['xywh'][2],
+        #                      'h': o['xywh'][3]})
+        #                 break
+        #             for i in m['yoloIDs']:
+        #                 if i == o['id']:
+        #                     m['steps'].append(
+        #                         {'time': datetime.utcnow(), 'x': o['xywh'][0], 'y': o['xywh'][1], 'w': o['xywh'][2],
+        #                          'h': o['xywh'][3]})
+        #                     break
+
+
+
         #             "xywh": r.boxes.xywh[i].tolist(),  # Convert tensor to list
         #         "cls": int(r.boxes.cls[i].item()),  # Convert single-value tensor to int
         #         "id": int(r.boxes.id[i].item()),  # Convert single-value tensor to int
         #         "conf": float(r.boxes.conf[i].item())  # Convert single-value tensor to float
         #         })
-        pass
+        # pass
 
