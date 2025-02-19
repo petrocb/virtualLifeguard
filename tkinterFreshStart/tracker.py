@@ -58,13 +58,18 @@ class tracker:
 
     def track(self, yoloResults):
         results = []
-        for i in range(len(yoloResults[0].boxes.xywh.tolist())):
-            results.append({
-                        "xywh": yoloResults[0].boxes.xywh[i].tolist(),
-                        "cls": int(yoloResults[0].boxes.cls[i].item()),
-                        "id": int(yoloResults[0].boxes.id[i].item()),
-                        "conf": float(yoloResults[0].boxes.conf[i].item())
-                    })
+        for r in yoloResults:
+            for i in range(len(r.boxes.xywh.tolist())):
+                try:
+                    if r.boxes.id is not None: # sometimes when there is a lot of change between frames YOLO doesn't attribute Ids, similar to this bug report: https://github.com/ultralytics/ultralytics/issues/3399
+                        results.append({
+                                    "xywh": r.boxes.xywh[i].tolist(),
+                                    "cls": int(r.boxes.cls[i].item()),
+                                    "id": int(r.boxes.id[i].item()),
+                                    "conf": float(r.boxes.conf[i].item())
+                                })
+                except Exception as e:
+                    print(e)
         # if self.locations is None:
         #     self.locations = []
         #     for i in results:
