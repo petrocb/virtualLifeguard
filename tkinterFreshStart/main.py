@@ -35,7 +35,7 @@ class SwimmerDetectionApp:
         # Load model and start video capture
         self.model = self.loadModel()
         # self.upScaleModel = RealESRGAN(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.running = True
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
