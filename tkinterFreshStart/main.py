@@ -13,7 +13,7 @@ from alerts.disappearing import disappearing
 import torch
 
 class SwimmerDetectionApp:
-    def _init_(self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("Swimmer Detection")
 
@@ -84,8 +84,8 @@ class SwimmerDetectionApp:
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=img)
-        self.label.imgtk = imgtk
-        self.label.configure(image=imgtk)
+        self.video_label.imgtk = imgtk
+        self.video_label.configure(image=imgtk)
         # print("Updating frame")
         self.tracker.track(results)
         self.root.after(10, self.updateFrame)
