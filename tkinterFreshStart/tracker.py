@@ -3,7 +3,6 @@ from copy import deepcopy
 class tracker:
     def __init__(self):
         self.locations = None
-        self.unfoundLocations = None
 
     def track(self, yoloResults):
         results = []
@@ -87,6 +86,7 @@ class tracker:
                                 'h': o['xywh'][3]
                             }]
                         })
+
     def getLocations(self):
         if self.locations:
             returnList = deepcopy(self.locations)
@@ -94,3 +94,9 @@ class tracker:
                 object['steps'] = list(reversed(object['steps']))
             return returnList
         return None
+
+    def saveLocations2File(self):
+        locations = self.getLocations()
+        if len(locations[0]['steps']) > 1000:
+            for i in locations:
+                i['steps'].pop()
