@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from copy import deepcopy
 class tracker:
     def __init__(self):
         self.locations = None
@@ -89,6 +89,8 @@ class tracker:
                         })
     def getLocations(self):
         if self.locations:
-            for object in self.locations:
+            returnList = deepcopy(self.locations)
+            for object in returnList:
                 object['steps'] = list(reversed(object['steps']))
-        return self.locations
+            return returnList
+        return None
