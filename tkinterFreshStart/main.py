@@ -68,7 +68,7 @@ class SwimmerDetectionApp:
         self.label.configure(image=imgtk)
         # print("Updating frame")
         self.tracker.track(results)
-        self.tracker.saveLocations2File()
+        self.tracker.saveLocations2File(True)
         self.root.after(10, self.updateFrame)
 
 
