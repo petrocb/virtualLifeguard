@@ -8,6 +8,7 @@ from tracker import tracker
 from alerts.always import Always
 from alerts.moving import Moving
 from alerts.velocity import velocity
+from alerts.disappearing import disappearing
 # from realesrgan import RealESRGAN
 import torch
 
@@ -42,7 +43,7 @@ class SwimmerDetectionApp:
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
         self.tracker = tracker()
-        self.alerts = [Always(), velocity()]
+        self.alerts = [disappearing()]
         self.updateFrame()
 
 
