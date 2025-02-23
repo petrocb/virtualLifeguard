@@ -96,7 +96,7 @@ class tracker:
         return None
 
     def saveLocations2File(self):
-        locations = self.getLocations()
-        if len(locations[0]['steps']) > 1000:
-            for i in locations:
-                i['steps'].pop()
+        print("lenth: ", len(self.locations[0]['steps']))
+        if len(self.locations[0]['steps']) >= 1000:
+            for i in self.locations:
+                del i['steps'][499:1000]
