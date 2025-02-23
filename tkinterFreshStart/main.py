@@ -6,6 +6,8 @@ from PIL import Image, ImageTk
 import pygame
 from tracker import tracker
 from alerts.always import Always
+from alerts.moving import Moving
+from alerts.velocity import velocity
 # from realesrgan import RealESRGAN
 import torch
 
@@ -40,7 +42,7 @@ class SwimmerDetectionApp:
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
         self.tracker = tracker()
-        self.alerts = [Always()]
+        self.alerts = [Always(), velocity()]
         self.updateFrame()
 
 
@@ -50,8 +52,8 @@ class SwimmerDetectionApp:
     def updateFrame(self):
         _, frame = self.cap.read()
         for i in self.alerts:
-            if i.step():
-                self.playSound()
+            print(i.step(self.tracker.getLocations()))
+                # self.playSound()
         # frame = self.upScaleModel.predict(frame)
         results = self.model.track(source=frame, conf=0.01, persist=True)
         # results = self.model.predict(frame, conf=0.1)

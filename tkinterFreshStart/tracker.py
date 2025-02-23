@@ -87,3 +87,8 @@ class tracker:
                                 'h': o['xywh'][3]
                             }]
                         })
+    def getLocations(self):
+        if self.locations:
+            for object in self.locations:
+                object['steps'] = list(reversed(object['steps']))
+        return self.locations
