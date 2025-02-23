@@ -64,6 +64,7 @@ class SwimmerDetectionApp:
         self.soundPlaying = False
         self.tracker = tracker()
         self.alerts = [disappearing()]
+        self.activeAlerts = []
         self.updateFrame()
 
 
@@ -73,7 +74,10 @@ class SwimmerDetectionApp:
     def updateFrame(self):
         _, frame = self.cap.read()
         for i in self.alerts:
-            print(i.step(self.tracker.getLocations()))
+            self.activeAlerts.append(i.step(self.tracker.getLocations()))
+
+
+        self.alertManager(self.activeAlerts)
                 # self.playSound()
         # frame = self.upScaleModel.predict(frame)
         results = self.model.track(source=frame, conf=0.01, persist=True)
@@ -100,6 +104,30 @@ class SwimmerDetectionApp:
         if not self.soundPlaying:
             self.sound.play(-1)
             self.soundPlaying = True
+
+    def alertManager(self, alerts):
+        for o in alerts:
+            if not i['dismissed']:
+             for i in alerts:
+                 if o['alertID'] != i['alertID']:
+                     if
+
+    def displayAlert(self, alert):
+        # Create the main Tkinter window
+        window = tk.Tk()
+        window.title("Notification")
+
+        # Add a label with the message
+        message_label = tk.Label(window, text=alert['type'], font=("Arial", 14), fg="red")
+        message_label.pack(pady=20)
+
+        # Add the Track button
+        track_button = tk.Button(window, text="Track")
+        track_button.pack(side=tk.LEFT, padx=20, pady=10)
+
+        # Add the Dismiss button
+        dismiss_button = tk.Button(window, text="Dismiss")
+        dismiss_button.pack(side=tk.RIGHT, padx=20, pady=10)
 
 if __name__ == "__main__":
     root = tk.Tk()

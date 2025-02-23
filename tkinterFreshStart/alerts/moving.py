@@ -12,7 +12,10 @@ class Moving:
                 if len(object['steps']) > 1:
                     print("x0:", round(object['steps'][0]['x']), "x1:", round(object['steps'][1]['x']), "y0:", round(object['steps'][0]['y']), "y1:", round(object['steps'][1]['y']))
                     if round(object['steps'][0]['x']) != round(object['steps'][1]['x']) or round(object['steps'][0]['y']) != round(object['steps'][1]['y']):
-                        alertLocations.append(object)
+                        alertLocations.append({'id': object['id'], 'time': object['steps'][0]['time'],
+                                               'x': object['steps'][0]['x'], 'y': object['steps'][0]['y'],
+                                               'w': object['steps'][0]['w'], 'h': object['steps'][0]['h'],
+                                               'dismissed': False})
 
         return alertLocations
 
