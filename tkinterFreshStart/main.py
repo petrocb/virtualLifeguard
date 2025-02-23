@@ -13,7 +13,7 @@ from alerts.disappearing import disappearing
 import torch
 
 class SwimmerDetectionApp:
-    def _init_(self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("Swimmer Detection")
 
