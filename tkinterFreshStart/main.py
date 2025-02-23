@@ -19,21 +19,41 @@ class SwimmerDetectionApp:
 
         # Main frame to hold video and other widgets
         self.main_frame = Frame(self.root)
-        self.main_frame.pack(padx=10, pady=10)
+        self.main_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
         # Video frame inside the main frame
-        self.video_frame = Frame(self.main_frame, width=640, height=480, bd=2, relief=tk.SUNKEN)
-        self.video_frame.grid(row=0, column=0, padx=5, pady=5)
+        self.video_frame = Frame(self.main_frame, width = 640, height = 480, relief=tk.SUNKEN)
+        # width = 640, height = 480, bd=2
+        # Tools frame on the left of the screen
+        self.tools_frame = Frame(self.main_frame)
+        self.video_label = Label(self.video_frame)
+        self.video_label.grid(row=0, column=0, sticky="nsew")
+        self.video_frame.grid_rowconfigure(0, weight=1)
+        self.video_frame.grid_columnconfigure(0, weight=1)
 
-        self.label = Label(self.video_frame)
-        self.label.pack()
+        # Layout config
+        self.tools_frame.grid(row=0, column=0, columnspan=1, rowspan = 1, sticky="nsew")
+        self.video_frame.grid(row=0, column=1, columnspan=9, sticky="nsew", padx=5, pady=5)
+
+        # Add tools to the tools_frame
+        tool_buttons = [
+            ("⚙\nSettings", "Settings"), ("🔑", "Thresholds"), ("⚙", "Settings"), ("✖", "Close"),
+            ("📁", "Open File"), ("💾", "Save"), ("⏳", "Loading"), ("🔄", "Refresh"),
+            ("🖼\nVideo\nOptions", "Image")
+        ]
+        for i, (symbol, tooltip) in enumerate(tool_buttons):
+            btn = tk.Button(self.tools_frame, text=symbol, font=("Arial", 8), bg="#f0f0f0", relief="raised")
+            btn.grid(row=i, column=0, padx=10, pady=5, sticky="ew")
+
+            # ("📤", "Upload"), ("📥", "Download"), ("🔑", "Key"),
+            # ("🛠", "Tools"), ("📊", "Stats"),
 
         # Placeholder for extra widgets (e.g., buttons, info labels)
-        self.streamOptionsFrame = Frame(self.main_frame)
-        self.streamOptionsFrame.grid(row=1, column=0)
+        # self.streamOptionsFrame = Frame(self.main_frame)
+        # self.streamOptionsFrame.grid(row=1, column=0)
 
-        tk.Label(self.streamOptionsFrame, text="brightness").grid(row=0, column=0)
-        tk.Scale(self.streamOptionsFrame, from_=0, to=100, orient="horizontal").grid(row=0, column=1)
+        # tk.Label(self.streamOptionsFrame, text="brightness").grid(row=0, column=0)
+        # tk.Scale(self.streamOptionsFrame, from_=0, to=100, orient="horizontal").grid(row=0, column=1)
 
         # Load model and start video capture
         self.model = self.loadModel()
@@ -64,8 +84,8 @@ class SwimmerDetectionApp:
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=img)
-        self.label.imgtk = imgtk
-        self.label.configure(image=imgtk)
+        self.video_label.imgtk = imgtk
+        self.video_label.configure(image=imgtk)
         # print("Updating frame")
         self.tracker.track(results)
         self.tracker.saveLocations2File(True)
