@@ -14,6 +14,7 @@ class Disappearing():
                         alertLocations.append({'objectID' : object['id'],
                                                'alertID' : uuid4(),
                                                'time': object['steps'][0]['time'],
+                                               'dismissedTime': None,
                                                'x': object['steps'][0]['x'],
                                                'y': object['steps'][0]['y'],
                                                'w': object['steps'][0]['w'],
