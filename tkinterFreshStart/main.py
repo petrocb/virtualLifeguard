@@ -11,6 +11,7 @@ from alerts.velocity import velocity
 from alerts.disappearing import Disappearing
 # from realesrgan import RealESRGAN
 import torch
+from datetime import datetime
 
 class SwimmerDetectionApp:
     def __init__(self, root):
@@ -65,6 +66,7 @@ class SwimmerDetectionApp:
         self.tracker = tracker()
         self.alerts = [Disappearing()]
         self.activeAlerts = []
+        self.dismissedAlerts = []
         self.updateFrame()
 
 
@@ -105,36 +107,52 @@ class SwimmerDetectionApp:
             self.sound.play(-1)
             self.soundPlaying = True
 
+    # dismissedAlertExists checks if there are any dismissed alerts in self.dismissedAlerts of a particular
+    # objectId, type and that were dismissed with a number of seconds (timeThreshold)
+    def dismissedAlertExists(self, objectID, type, timeThreshold):
+        return any(disAlrt['objectID'] == objectID and
+                   disAlrt['type'] == type and
+                   (datetime.utcnow() - disAlrt['dismissedTime']).total_seconds() < timeThreshold for
+                   disAlrt in self.dismissedAlerts)
+
     def alertManager(self, alerts):
         if not self.activeAlerts:
-            self.activeAlerts = alerts
+            for i in alerts:
+                if not self.dismissedAlertExists(i['objectID'], i['type'] , 60):
+                    self.activeAlerts = alerts
 
         else:
             for i in alerts:
-                if not any(alrt['objectID'] == i['objectID'] and alrt['type'] == i['type'] for alrt in self.activeAlerts):
-                    self.activeAlerts.append(i)
-
+                if not any(alrt['objectID'] == i['objectID'] and
+                           alrt['type'] == i['type']
+                           for alrt in self.activeAlerts):
+                    if not self.dismissedAlertExists(i['objectID'], i['type'] , 60):
+                        self.activeAlerts.append(i)
 
         for i in self.activeAlerts:
             if not i['displayed']:
                 i['displayed'] = True
+                i['active'] = True
                 self.displayAlert(i)
 
+    def dismissButton(self, alert, window):
+        self.activeAlerts.remove(alert)
+        alert['dismissedTime'] = datetime.utcnow()
+        self.dismissedAlerts.append(alert)
+        window.destroy()
+
+
     def displayAlert(self, alert):
-        # Create the main Tkinter window
         window = tk.Tk()
         window.title("Notification")
 
-        # Add a label with the message
         message_label = tk.Label(window, text=str(alert['type'] + " " + str(alert['objectID'])), font=("Arial", 14), fg="red")
         message_label.pack(pady=20)
 
-        # Add the Track button
         track_button = tk.Button(window, text="Track")
         track_button.pack(side=tk.LEFT, padx=20, pady=10)
 
-        # Add the Dismiss button
-        dismiss_button = tk.Button(window, text="Dismiss")
+        dismiss_button = tk.Button(window, text="Dismiss", command=lambda : self.dismissButton(alert, window))
         dismiss_button.pack(side=tk.RIGHT, padx=20, pady=10)
 
 if __name__ == "__main__":
