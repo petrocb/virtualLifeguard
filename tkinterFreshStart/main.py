@@ -24,7 +24,7 @@ class SwimmerDetectionApp:
 
         # Video frame inside the main frame
         self.video_frame = Frame(self.main_frame, width = 640, height = 480, relief=tk.SUNKEN)
-        # width = 640, height = 480, bd=2
+
         # Tools frame on the left of the screen
         self.tools_frame = Frame(self.main_frame)
         self.video_label = Label(self.video_frame)
@@ -32,29 +32,24 @@ class SwimmerDetectionApp:
         self.video_frame.grid_rowconfigure(0, weight=1)
         self.video_frame.grid_columnconfigure(0, weight=1)
 
-        # Layout config
-        self.tools_frame.grid(row=0, column=0, columnspan=1, rowspan = 1, sticky="nsew")
-        self.video_frame.grid(row=0, column=1, columnspan=9, sticky="nsew", padx=5, pady=5)
-
         # Add tools to the tools_frame
         tool_buttons = [
-            ("⚙\nSettings", "Settings"), ("🔑", "Thresholds"), ("⚙", "Settings"), ("✖", "Close"),
-            ("📁", "Open File"), ("💾", "Save"), ("⏳", "Loading"), ("🔄", "Refresh"),
-            ("🖼\nVideo\nOptions", "Image")
+            ("⚙\nSettings"), ("🛠\nThresholds"), ("🖼\nVideo\nOptions"), ("✖", "Close")
         ]
-        for i, (symbol, tooltip) in enumerate(tool_buttons):
+        for i, (symbol) in enumerate(tool_buttons):
             btn = tk.Button(self.tools_frame, text=symbol, font=("Arial", 8), bg="#f0f0f0", relief="raised")
-            btn.grid(row=i, column=0, padx=10, pady=5, sticky="ew")
+            btn.grid(row=i, column=0, padx=2, pady=5, sticky="ew")
 
-            # ("📤", "Upload"), ("📥", "Download"), ("🔑", "Key"),
-            # ("🛠", "Tools"), ("📊", "Stats"),
+        # The information dashboard
+        self.info_dash_frame = Frame(self.main_frame, height=200)
+        self.info_dash_frame.grid_rowconfigure(0, weight=0)
+        self.info_dash_label = Label(self.info_dash_frame, text="Information dashboard", font=("Arial", 12, "bold"))
 
-        # Placeholder for extra widgets (e.g., buttons, info labels)
-        # self.streamOptionsFrame = Frame(self.main_frame)
-        # self.streamOptionsFrame.grid(row=1, column=0)
-
-        # tk.Label(self.streamOptionsFrame, text="brightness").grid(row=0, column=0)
-        # tk.Scale(self.streamOptionsFrame, from_=0, to=100, orient="horizontal").grid(row=0, column=1)
+        # Layout config
+        self.tools_frame.grid(row=0, column=0, columnspan=1, rowspan = 2, sticky="nsew")
+        self.video_frame.grid(row=0, column=1, columnspan=1, sticky="nsew", padx=5, pady=5)
+        self.info_dash_frame.grid(row=1, column=0, columnspan=2, rowspan = 1, sticky="nsew")
+        self.info_dash_label.grid(row=0, column=0, sticky="w")
 
         # Load model and start video capture
         self.model = self.loadModel()
@@ -94,7 +89,7 @@ class SwimmerDetectionApp:
         self.video_label.configure(image=imgtk)
         # print("Updating frame")
         self.tracker.track(results)
-        self.tracker.saveLocations2File(True)
+        self.tracker.saveLocations2File(False)
         self.root.after(10, self.updateFrame)
 
 
