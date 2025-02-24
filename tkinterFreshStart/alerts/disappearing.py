@@ -1,7 +1,7 @@
 from math import sqrt, pow
 from datetime import datetime, timedelta
 from uuid import uuid4
-class disappearing:
+class Disappearing():
     def __init__(self):
         pass
 
@@ -18,7 +18,8 @@ class disappearing:
                                                'y': object['steps'][0]['y'],
                                                'w': object['steps'][0]['w'],
                                                'h': object['steps'][0]['h'],
-                                               'dismissed': False,
+                                               'active': False,
+                                               'displayed': False,
                                                'type' : "Person has Disappeared"})
         if alertLocations != []:
             return alertLocations

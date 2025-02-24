@@ -8,7 +8,7 @@ from tracker import tracker
 from alerts.always import Always
 from alerts.moving import Moving
 from alerts.velocity import velocity
-from alerts.disappearing import disappearing
+from alerts.disappearing import Disappearing
 # from realesrgan import RealESRGAN
 import torch
 
@@ -63,7 +63,7 @@ class SwimmerDetectionApp:
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
         self.tracker = tracker()
-        self.alerts = [disappearing()]
+        self.alerts = [Disappearing()]
         self.activeAlerts = []
         self.updateFrame()
 
@@ -74,10 +74,10 @@ class SwimmerDetectionApp:
     def updateFrame(self):
         _, frame = self.cap.read()
         for i in self.alerts:
-            self.activeAlerts.append(i.step(self.tracker.getLocations()))
-
-
-        self.alertManager(self.activeAlerts)
+            tempAlerts = i.step(self.tracker.getLocations())
+            if tempAlerts:
+                self.alertManager(tempAlerts)
+        # self.alertManager(self.activeAlerts)
                 # self.playSound()
         # frame = self.upScaleModel.predict(frame)
         results = self.model.track(source=frame, conf=0.01, persist=True)
@@ -106,11 +106,19 @@ class SwimmerDetectionApp:
             self.soundPlaying = True
 
     def alertManager(self, alerts):
-        for o in alerts:
-            if not i['dismissed']:
-             for i in alerts:
-                 if o['alertID'] != i['alertID']:
-                     if
+        if not self.activeAlerts:
+            self.activeAlerts = alerts
+
+        else:
+            for i in alerts:
+                if not any(alrt['objectID'] == i['objectID'] and alrt['type'] == i['type'] for alrt in self.activeAlerts):
+                    self.activeAlerts.append(i)
+
+
+        for i in self.activeAlerts:
+            if not i['displayed']:
+                i['displayed'] = True
+                self.displayAlert(i)
 
     def displayAlert(self, alert):
         # Create the main Tkinter window
@@ -118,7 +126,7 @@ class SwimmerDetectionApp:
         window.title("Notification")
 
         # Add a label with the message
-        message_label = tk.Label(window, text=alert['type'], font=("Arial", 14), fg="red")
+        message_label = tk.Label(window, text=str(alert['type'] + " " + str(alert['objectID'])), font=("Arial", 14), fg="red")
         message_label.pack(pady=20)
 
         # Add the Track button
