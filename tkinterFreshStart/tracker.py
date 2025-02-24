@@ -6,6 +6,13 @@ class tracker:
     def __init__(self):
         self.locations = None
 
+    # This function should clear short lasting locations. Usually they are mistakes
+    def clearEephemeralLocations(self):
+        for i in self.locations:
+            if (datetime.utcnow() - i['steps'][-1]['time']).total_seconds() > 5 and (i['steps'][-1]['time'] - i['steps'][0]['time']).total_seconds() < 3:
+                self.locations.remove(i)
+
+
     def track(self, yoloResults):
         results = []
         for r in yoloResults:
@@ -45,7 +52,7 @@ class tracker:
             else:
                 for o in results:
                 # if result id matches a location id - add a step to existing location id
-                    match = next((loc for loc in self.locations if loc['id'] == o['id']), None)
+                    match = next((loc for loc in self.locations if loc['yoloIDs'][-1] == o['id']), None)
                     if match:
                         print('we matched id: ' + str(match['id']))
                         match['steps'].append({
@@ -59,11 +66,11 @@ class tracker:
                         # if the result is near an existing location which doesn't appear in these results - replace the
                         # location id with the result id
                         for loc in self.locations:
-                            if (abs(o['xywh'][0] - loc['steps'][-1]['x']) < 200 and
-                                    abs(o['xywh'][1] - loc['steps'][-1]['y']) < 200 and
-                                    not any(oldresult['id'] == loc['id'] for oldresult in results)):
+                            if (abs(o['xywh'][0] - loc['steps'][-1]['x']) < 100 and
+                                    abs(o['xywh'][1] - loc['steps'][-1]['y']) < 100 and
+                                    not any(result['id'] == loc['yoloIDs'][-1] for result in results)):
                                 print('we swapped an id: ' + str(loc['id']) + ' with: ' + str(o['id']))
-                                loc['id'] = o['id']
+                                loc['yoloIDs'].append(o['id'])
                                 loc['steps'].append({
                                     'time': datetime.utcnow(),
                                     'x': o['xywh'][0],
@@ -74,7 +81,7 @@ class tracker:
                                 break
 
                     # if we still haven't added the current result id into the locations, add a new location id
-                    if not any(loc['id'] == o['id'] for loc in self.locations):
+                    if not any(loc['yoloIDs'][-1] == o['id'] for loc in self.locations):
                         print('we added a new id: ' + str(o['id']))
                         self.locations.append({
                             'id': o['id'],
@@ -88,6 +95,7 @@ class tracker:
                                 'h': o['xywh'][3]
                             }]
                         })
+        self.clearEephemeralLocations()
 
     def getLocations(self):
         if self.locations:
