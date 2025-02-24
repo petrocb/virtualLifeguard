@@ -126,8 +126,3 @@ class tracker:
                     filePath = f"logs/{str(datetime.utcnow().isoformat()).replace(":", "")}PartialArchive{str(partArchive['id'])}.json"
                     with open(filePath, "w") as json_file:
                         json.dump(partArchive, json_file, default=self.convert2dateTime, indent=5)
-                # self.locations.pop(rand)
-
-        # if len(self.locations[0]['steps']) >= 1000:
-        #     for i in self.locations:
-        #         del i['steps'][499:1000]

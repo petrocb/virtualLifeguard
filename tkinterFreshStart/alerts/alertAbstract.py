@@ -1,9 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
-class alert(ABC):
+class Alert(ABC):
 
-    @abstractmethod
     def alertManger(self):
         pass
-
-    def
