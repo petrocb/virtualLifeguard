@@ -55,6 +55,8 @@ class SwimmerDetectionApp:
         self.model = self.loadModel()
         # self.upScaleModel = RealESRGAN(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
         self.cap = cv2.VideoCapture(1)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         self.running = True
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
@@ -77,6 +79,8 @@ class SwimmerDetectionApp:
         # self.alertManager(self.activeAlerts)
                 # self.playSound()
         # frame = self.upScaleModel.predict(frame)
+        print(f"Frame size: {frame.shape}")
+        # frame = cv2.resize(frame, (1080, 1080))
         results = self.model.track(source=frame, conf=0.01, persist=True)
         # results = self.model.predict(frame, conf=0.1)
         frame = results[0].plot(labels=True)
@@ -128,7 +132,8 @@ class SwimmerDetectionApp:
             if not i['displayed']:
                 i['displayed'] = True
                 i['active'] = True
-                self.displayAlert(i)
+                # self.displayAlert(i)
+                self.updateInfoDash()
 
     def dismissButton(self, alert, window):
         self.activeAlerts.remove(alert)
@@ -138,17 +143,48 @@ class SwimmerDetectionApp:
 
 
     def displayAlert(self, alert):
-        window = tk.Tk()
-        window.title("Notification")
+        # window = tk.Tk()
+        # window.title("Notification")
 
-        message_label = tk.Label(window, text=str(alert['type'] + " " + str(alert['objectID'])), font=("Arial", 14), fg="red")
+        message_label = tk.Label(self.info_dash_frame, text=str(alert['type'] + " " + str(alert['objectID'])), font=("Arial", 14), fg="red")
         message_label.pack(pady=20)
 
-        track_button = tk.Button(window, text="Track")
+        track_button = tk.Button(self.info_dash_frame, text="Track")
         track_button.pack(side=tk.LEFT, padx=20, pady=10)
 
-        dismiss_button = tk.Button(window, text="Dismiss", command=lambda : self.dismissButton(alert, window))
+        dismiss_button = tk.Button(self.info_dash_frame, text="Dismiss", command=lambda : self.dismissButton(alert, self.info_dash_frame))
         dismiss_button.pack(side=tk.RIGHT, padx=20, pady=10)
+
+    def updateInfoDash(self):
+        # First, clear the existing widgets in the info dashboard frame.
+        for widget in self.info_dash_frame.winfo_children():
+            widget.destroy()
+
+        if self.activeAlerts:
+            for alert in self.activeAlerts:
+                # Create a frame for each alert.
+                alert_frame = tk.Frame(self.info_dash_frame, borderwidth=1, relief="solid", padx=5, pady=5)
+                alert_frame.pack(fill="x", padx=5, pady=2)
+
+                # Display the alert information.
+                alert_text = f"Alert: {alert['type']} - ID: {alert['objectID']}"
+                label = tk.Label(alert_frame, text=alert_text, font=("Arial", 12))
+                label.pack(side="left", padx=10)
+
+                # Add a Track button for future functionality.
+                track_button = tk.Button(alert_frame, text="Track",
+                                         command=lambda a=alert: self.trackAlert(a))
+                track_button.pack(side="left", padx=10)
+
+                # Add a Dismiss button that calls a custom method.
+                dismiss_button = tk.Button(alert_frame, text="Dismiss",
+                                           command=lambda a=alert: self.dismissAlertFromDash(a))
+                dismiss_button.pack(side="left", padx=10)
+        else:
+            # If there are no active alerts, show a default message.
+            no_alert_label = tk.Label(self.info_dash_frame, text="No active alerts", font=("Arial", 12))
+            no_alert_label.pack(padx=10, pady=10)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
