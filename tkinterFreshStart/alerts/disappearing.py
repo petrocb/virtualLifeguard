@@ -13,6 +13,7 @@ class Disappearing():
                         print("object id: " + str(object['id']) + " has disappeared")
                         alertLocations.append({'objectID' : object['id'],
                                                'alertID' : uuid4(),
+                                               'yoloIDs' : object['yoloIDs'],
                                                'time': object['steps'][0]['time'],
                                                'dismissedTime': None,
                                                'x': object['steps'][0]['x'],

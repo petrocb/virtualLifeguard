@@ -55,12 +55,16 @@ class SwimmerDetectionApp:
         self.model = self.loadModel()
         # self.upScaleModel = RealESRGAN(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
         self.cap = cv2.VideoCapture(1)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.running = True
         self.sound = pygame.mixer.Sound(r"C:\Users\petro\Downloads\file_example_MP3_700KB.mp3")
         self.soundPlaying = False
         self.tracker = tracker()
+        # the list of active alert classes
+        # alert classes analyse tracker data and return alerts
+        # Toogle self.labels on/off to show YOLOv11 labels on screen
+        self.labels = True
         self.alerts = [Disappearing()]
         self.activeAlerts = []
         self.dismissedAlerts = []
@@ -68,6 +72,8 @@ class SwimmerDetectionApp:
 
 
     def loadModel(self):
+        # use this for a larger model
+        # return YOLO('yolo11n.pt')
         return YOLO('yolo11n.pt')
 
     def updateFrame(self):
@@ -79,11 +85,11 @@ class SwimmerDetectionApp:
         # self.alertManager(self.activeAlerts)
                 # self.playSound()
         # frame = self.upScaleModel.predict(frame)
-        print(f"Frame size: {frame.shape}")
+        # print(f"Frame size: {frame.shape}")
         # frame = cv2.resize(frame, (1080, 1080))
         results = self.model.track(source=frame, conf=0.01, persist=True)
         # results = self.model.predict(frame, conf=0.1)
-        frame = results[0].plot(labels=True)
+        frame = results[0].plot(labels=self.labels)
 
 
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -167,7 +173,10 @@ class SwimmerDetectionApp:
                 alert_frame.pack(fill="x", padx=5, pady=2)
 
                 # Display the alert information.
-                alert_text = f"Alert: {alert['type']} - ID: {alert['objectID']}"
+                if self.labels == True and alert['objectID'] != max(alert['yoloIDs']):
+                    alert_text = f"Alert: {alert['type']} - Original ID: {alert['objectID']} with on screen ID of {alert['yoloIDs'][-1]}"
+                else:
+                    alert_text = f"Alert: {alert['type']} - ID: {alert['objectID']}"
                 label = tk.Label(alert_frame, text=alert_text, font=("Arial", 12))
                 label.pack(side="left", padx=10)
 
