@@ -82,17 +82,14 @@ class SwimmerDetectionApp:
             tempAlerts = i.step(self.tracker.getLocations())
             if tempAlerts:
                 self.alertManager(tempAlerts)
-        # self.alertManager(self.activeAlerts)
-                # self.playSound()
-        # frame = self.upScaleModel.predict(frame)
-        # print(f"Frame size: {frame.shape}")
-        # frame = cv2.resize(frame, (1080, 1080))
         results = self.model.track(source=frame, conf=0.01, persist=True)
         # results = self.model.predict(frame, conf=0.1)
         frame = results[0].plot(labels=self.labels)
 
 
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        img = self.drawBoxes(img, self.activeAlerts)
+        #
         img = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=img)
         self.video_label.imgtk = imgtk
@@ -101,6 +98,7 @@ class SwimmerDetectionApp:
         self.tracker.track(results)
         self.tracker.saveLocations2File(False)
         self.root.after(10, self.updateFrame)
+        # self.annotator = Annotator(frame, line_width=2)
 
 
     def onClosing(self):
@@ -141,11 +139,24 @@ class SwimmerDetectionApp:
                 # self.displayAlert(i)
                 self.updateInfoDash()
 
-    def dismissButton(self, alert, window):
+    def drawBoxes(self, img, alerts):
+        for i in alerts:
+            if i['showLastLocation'] == True:
+                cords = {'x1' : int(i['x'] - (i['w']/2)),
+                         'x2' : int(i['x'] + (i['w']/2)),
+                         'y1' : int(i['y'] - (i['h']/2)),
+                         'y2' : int(i['y'] + (i['h']/2))}
+                # cv2.rectangle(img, (100, 100), (200, 200), (255, 0, 0), 2)
+                cv2.rectangle(img, (cords['x1'], cords['y1']), (cords['x2'], cords['y2']), (255, 0, 0), 2)
+                cv2.putText(img, f"Org ID: {i['objectID']} Scr ID: {i['yoloIDs'][-1]}", (cords['x1'], cords['y1']-10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 2 )
+        return img
+
+
+    def dismissButton(self, alert):
         self.activeAlerts.remove(alert)
         alert['dismissedTime'] = datetime.utcnow()
         self.dismissedAlerts.append(alert)
-        window.destroy()
+        self.updateInfoDash()
 
 
     def displayAlert(self, alert):
@@ -161,12 +172,17 @@ class SwimmerDetectionApp:
         dismiss_button = tk.Button(self.info_dash_frame, text="Dismiss", command=lambda : self.dismissButton(alert, self.info_dash_frame))
         dismiss_button.pack(side=tk.RIGHT, padx=20, pady=10)
 
+    def showLastLocationOnScreen(self, alert):
+        alert['showLastLocation'] = not alert['showLastLocation']
+        self.updateInfoDash()
+
     def updateInfoDash(self):
         # First, clear the existing widgets in the info dashboard frame.
         for widget in self.info_dash_frame.winfo_children():
             widget.destroy()
 
         if self.activeAlerts:
+            self.playSound()
             for alert in self.activeAlerts:
                 # Create a frame for each alert.
                 alert_frame = tk.Frame(self.info_dash_frame, borderwidth=1, relief="solid", padx=5, pady=5)
@@ -179,20 +195,25 @@ class SwimmerDetectionApp:
                     alert_text = f"Alert: {alert['type']} - ID: {alert['objectID']}"
                 label = tk.Label(alert_frame, text=alert_text, font=("Arial", 12))
                 label.pack(side="left", padx=10)
-
+                if alert['showLastLocation'] == True:
+                    text = "Remove Last Location"
+                else:
+                    text = "Show Last Location"
                 # Add a Track button for future functionality.
-                track_button = tk.Button(alert_frame, text="Track",
-                                         command=lambda a=alert: self.trackAlert(a))
+                track_button = tk.Button(alert_frame, text=text,
+                                         command=lambda a=alert: self.showLastLocationOnScreen(a))
                 track_button.pack(side="left", padx=10)
 
                 # Add a Dismiss button that calls a custom method.
                 dismiss_button = tk.Button(alert_frame, text="Dismiss",
-                                           command=lambda a=alert: self.dismissAlertFromDash(a))
+                                           command=lambda a=alert: self.dismissButton(a))
                 dismiss_button.pack(side="left", padx=10)
         else:
             # If there are no active alerts, show a default message.
             no_alert_label = tk.Label(self.info_dash_frame, text="No active alerts", font=("Arial", 12))
             no_alert_label.pack(padx=10, pady=10)
+            self.sound.stop()
+            self.soundPlaying = False
 
 
 if __name__ == "__main__":
