@@ -22,6 +22,7 @@ class Disappearing():
                                                'h': object['steps'][0]['h'],
                                                'active': False,
                                                'displayed': False,
+                                               'showLastLocation' : False,
                                                'type' : "Person has Disappeared"})
         if alertLocations != []:
             return alertLocations

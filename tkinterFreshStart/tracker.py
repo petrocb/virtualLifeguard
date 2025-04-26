@@ -110,27 +110,28 @@ class tracker:
             return obj.isoformat()
 
     def saveLocations2File(self, createLogs):
-        rand = randint(0, len(self.locations) - 1)
-        if self.locations[rand]['steps'][0]['time'] < datetime.utcnow() - timedelta(seconds = 90):
-            if self.locations[rand]['steps'][-1]['time'] < datetime.utcnow() - timedelta(seconds = 60):
-                if createLogs:
-                    filePath = f"logs/{str(datetime.utcnow().isoformat()).replace(":", "")}Archive{str(self.locations[rand]['id'])}.json"
-                    with open(filePath, "w") as json_file:
-                        json.dump(self.locations[rand], json_file, default=self.convert2dateTime, indent=5)
-                self.locations.pop(rand)
-            else:
-                stepsToArchive = []
-                for i in self.locations[rand]['steps']:
-                    if i['time'] < datetime.utcnow() - timedelta(seconds = 60):
-                        if createLogs:
-                            stepsToArchive.append(i)
-                        self.locations[rand]['steps'].remove(i)
-                if createLogs:
-                    partArchive = {
-                            'id': self.locations[rand]['id'],
-                            'class': self.locations[rand]['class'],
-                            'steps': stepsToArchive
-                    }
-                    filePath = f"logs/{str(datetime.utcnow().isoformat()).replace(":", "")}PartialArchive{str(partArchive['id'])}.json"
-                    with open(filePath, "w") as json_file:
-                        json.dump(partArchive, json_file, default=self.convert2dateTime, indent=5)
+        if len(self.locations) != 0:
+            rand = randint(0, len(self.locations) - 1)
+            if self.locations[rand]['steps'][0]['time'] < datetime.utcnow() - timedelta(seconds = 90):
+                if self.locations[rand]['steps'][-1]['time'] < datetime.utcnow() - timedelta(seconds = 60):
+                    if createLogs:
+                        filePath = f"logs/{str(datetime.utcnow().isoformat()).replace(":", "")}Archive{str(self.locations[rand]['id'])}.json"
+                        with open(filePath, "w") as json_file:
+                            json.dump(self.locations[rand], json_file, default=self.convert2dateTime, indent=5)
+                    self.locations.pop(rand)
+                else:
+                    stepsToArchive = []
+                    for i in self.locations[rand]['steps']:
+                        if i['time'] < datetime.utcnow() - timedelta(seconds = 60):
+                            if createLogs:
+                                stepsToArchive.append(i)
+                            self.locations[rand]['steps'].remove(i)
+                    if createLogs:
+                        partArchive = {
+                                'id': self.locations[rand]['id'],
+                                'class': self.locations[rand]['class'],
+                                'steps': stepsToArchive
+                        }
+                        filePath = f"logs/{str(datetime.utcnow().isoformat()).replace(":", "")}PartialArchive{str(partArchive['id'])}.json"
+                        with open(filePath, "w") as json_file:
+                            json.dump(partArchive, json_file, default=self.convert2dateTime, indent=5)
